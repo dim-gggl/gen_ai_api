@@ -5,42 +5,10 @@ from google import genai
 from google.genai import types
 
 from configs import GOOGLE_MODELS, GOOGLE_API_KEY
+from cli_core import command, set_build_parser
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Generate text via Google Gemini API"
-    )
-    parser.add_argument("--api_key",
-                        default=GOOGLE_API_KEY,
-                        help="Gemini API key (env: GEMINI_API_KEY or GOOGLE_API_KEY)")
-    parser.add_argument("--vertexai",
-                        action="store_true",
-                        help="Use Vertex AI endpoints instead of Gemini Developer API")
-    parser.add_argument("--project",
-                        default=os.getenv("GOOGLE_CLOUD_PROJECT"),
-                        help="Google Cloud Project ID (required for Vertex AI)")
-    parser.add_argument("--location",
-                        default=os.getenv("GOOGLE_CLOUD_LOCATION"),
-                        help="Google Cloud location (e.g. 'us-central1')")
-    parser.add_argument("--api_version",
-                        default=None,
-                        help="API version (v1, v1beta3, etc.)")
-    parser.add_argument("--model",
-                        default="gemini-2.5-flash",
-                        help="Gemini model to use")
-    parser.add_argument("--prompt",
-                        default=input("Enter your prompt: ").strip(),
-                        help="Text prompt for content generation")
-    parser.add_argument("--max_output_tokens",
-                        type=int,
-                        default=None,
-                        help="Maximum number of tokens to generate")
-    parser.add_argument("--temperature",
-                        type=float,
-                        default=None,
-                        help="Sampling temperature")
-    args = parser.parse_args()
-
+@command('gemini', help='Generate text via Google Gemini API')
+def main(args):
     # Build HTTP options if a specific API version is requested
     http_opts = types.HttpOptions(api_version=args.api_version) if args.api_version else None
 
@@ -70,5 +38,30 @@ def main():
 
     print(response.text)
 
+@set_build_parser('gemini')
+def build(p):
+    p.add_argument("--api-key",
+                    default=GOOGLE_API_KEY,
+                    help="Gemini API key (env: GEMINI_API_KEY or GOOGLE_API_KEY)")
+    p.add_argument("-M",
+                    "--model",
+                    choices=GOOGLE_MODELS,
+                    default="gemini-2.5-flash",
+                    help="Gemini model to use")
+    p.add_argument("--prompt",
+                    default=input("Enter your prompt: ").strip(),
+                    help="Text prompt for content generation")
+    p.add_argument("--max-output-tokens",
+                    type=int,
+                    default=1024,
+                    help="Maximum number of tokens to generate")
+    p.add_argument("--temperature",
+                    type=float,
+                    default=0.0,
+                    help="Sampling temperature (0.0-1.0)")
+    args = p.parse_args()
+    return args
+
 if __name__ == "__main__":
-    main()
+    args = build(argparse.ArgumentParser())
+    main(args)
