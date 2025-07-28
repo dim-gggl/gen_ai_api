@@ -1,0 +1,9 @@
+{
+    "bedding-gecko-001": {
+        "name": "models/embedding-gecko-001",
+        "display_name": "Embedding Gecko",
+        "description": "Obtain a distributed representation of a text.",
+        "version": "001",
+        "endpoints": null,
+        "labels": null,
+        "tuned_model_info": 

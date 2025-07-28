@@ -4,34 +4,21 @@ from google import genai
 from google.genai import types
 
 from configs import GOOGLE_API_KEY, GOOGLE_MODELS
+from cli_core import command, set_build_parser
 
 
-def main():
+@command('gemini-video', help='Generate video via Gemini API')
+def gemini_veo3_video_main(args):
+    main(args)
 
-    parser = argparse.ArgumentParser(
-        description="A video generator using Gemini API"
-    )
-    parser.add_argument("--prompt")
-    parser.add_argument("--negative-prompt")
-    parser.add_argument("--output")
-    parser.add_argument("--model", 
-                        default="veo-3.0-generate-preview",
-                        choices=["veo-2.0-generate-001"],
-                        help="The model to use for video generation")
-    parser.add_argument("--api-key",
-                        default=GOOGLE_API_KEY,
-                        help="The API key to use for video generation")
-    parser.add_argument("--ar", default="16:9")
-    parser.add_argument("--image", default=None)
-    parser.add_argument("--n", default=1)
-    args = parser.parse_args()
+def main(args):
+    prompt = args.prompt
+    if not prompt:
+        prompt = input("Enter a prompt: ").strip() or "A cat playing with a ball"
 
     model = args.model
     if args.image:
         model = "veo-2.0-generate-001"
-    prompt = args.prompt
-    if not prompt:
-        prompt = input("Your prompt : ").strip()
 
     client = genai.Client(api_key=args.api_key)
 
@@ -66,5 +53,23 @@ def main():
     output = args.output or f"gen_video/output/veo3/{file_name}"
     generated_video.video.save(output)
 
+@set_build_parser('gemini-video')
+def build(p):
+    p.add_argument("--prompt")
+    p.add_argument("--negative-prompt")
+    p.add_argument("--output")
+    p.add_argument("--model", 
+                        default="veo-3.0-generate-preview",
+                        choices=["veo-2.0-generate-001"],
+                        help="The model to use for video generation")
+    p.add_argument("--api-key",
+                        default=GOOGLE_API_KEY,
+                        help="The API key to use for video generation")
+    p.add_argument("--ar", default="16:9")
+    p.add_argument("--image", default=None)
+    p.add_argument("--n", default=1)
+    args = p.parse_args()
+    return args
+
 if __name__ == "__main__":
-    main()
+    gemini_veo3_video_main(build(argparse.ArgumentParser()))

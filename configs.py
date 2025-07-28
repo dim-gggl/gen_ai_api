@@ -21,7 +21,8 @@ OPENAI_MODELS = [
     "o4-mini",
     "gpt-4.1-nano",
     "o3-mini",
-    "gpt-image-1"
+    "gpt-image-1",
+    "dall-e-3"
 ]
 
 ###########################
@@ -33,10 +34,14 @@ XAI_MODELS = [
     "grok-3-mini-fast",
     "grok-4-0709",
     "grok-3-mini",
-    "grok-2-image-1212"
+    "grok-2-image-1212",
+    "grok-2-vision-1212",
+    "grok-3-fast",
+    "grok-2-1212",
+    "grok-3"
 ]
 
-######1#####################
+############################
 # GOOGLE
 ############################
 
@@ -46,5 +51,6 @@ GOOGLE_MODELS = [
     "veo-2.0-generate-001", # <--- VIDEO GENERATION
     "gemini-2.0-flash-preview-image-generation", # <--- IMAGE GENERATION
     "imagen-4.0-generate-preview-06-06", # <--- IMAGE GENERATION
-    "gemini-2.5-flash" # <--- TEXT GENERATION
+    "gemini-2.5-flash", # <--- TEXT GENERATION
+    "gemini-2.5-pro" # <--- TEXT GENERATION
 ]

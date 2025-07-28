@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import argparse
 from google import genai
 from google.genai import types
@@ -7,8 +6,9 @@ from google.genai import types
 from configs import GOOGLE_MODELS, GOOGLE_API_KEY
 from cli_core import command, set_build_parser
 
-@command('gemini', help='Generate text via Google Gemini API')
-def main(args):
+
+@command('gemini-text', help='Generate text via Google Gemini API')
+def gemini_text_main(args):
     # Build HTTP options if a specific API version is requested
     http_opts = types.HttpOptions(api_version=args.api_version) if args.api_version else None
 
@@ -22,7 +22,7 @@ def main(args):
         client_kwargs["http_options"] = http_opts
 
     client = genai.Client(**{k: v for k, v in client_kwargs.items() if v is not None})
-    # :contentReference[oaicite:3]{index=3}
+    
 
     # Configure generation settings
     gen_config = types.GenerateContentConfig(
@@ -34,11 +34,11 @@ def main(args):
         model=args.model,
         contents=args.prompt,
         config=gen_config
-    )  # :contentReference[oaicite:4]{index=4}
+    )  
 
     print(response.text)
 
-@set_build_parser('gemini')
+@set_build_parser('gemini-text')
 def build(p):
     p.add_argument("--api-key",
                     default=GOOGLE_API_KEY,
@@ -58,10 +58,9 @@ def build(p):
     p.add_argument("--temperature",
                     type=float,
                     default=0.0,
-                    help="Sampling temperature (0.0-1.0)")
+                    help="Sampling temperature (0.0 - 1.0)")
     args = p.parse_args()
     return args
 
 if __name__ == "__main__":
-    args = build(argparse.ArgumentParser())
-    main(args)
+    gemini_text_main(build(argparse.ArgumentParser()))

@@ -4,44 +4,26 @@ import random
 import string
 import json
 
-from ..config import ANTHROPIC_API_KEY
+from configs import ANTHROPIC_API_KEY
+from cli_core import command, set_build_parser
 
 
-client = anthropic.Anthropic(
-    api_key=ANTHROPIC_API_KEY
-)
+@command('anthropic-deep-search', help='Deep search with Anthropic')
+def anthropic_deep_search_main(args):
+    main(args)
 
 
-def add_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        prog=__file__,
-        description="Deep search with Anthropic",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        usage="python3 anthropic_deep_search.py [-p | --prompt=<text>] [-o | --file-name=<path>] [-t | --thinking-budget=<value>] [-m | --max-tokens=<value>] [-M | --model=<value>] <command> [<args>]",
-        epilog="Example: python3 anthropic_deep_search.py -p 'What is the capital of France?' -o 'response.txt' -t 10000 -m 16000 -M 'claude-sonnet-4-20250514'",
-        add_help=True,
-        allow_abbrev=True,
-        fromfile_prefix_chars="@",
-        argument_default=argparse.SUPPRESS,
-        conflict_handler="resolve",
-        exit_on_error=False,
-        prefix_chars="-"
-    )
-    parser.add_argument("-p", "-prompt", type=str,  help="The prompt to send to the model")
-    parser.add_argument("-o", "-file-name", type=str, help="The name of the file to save the response to")
-    parser.add_argument("-t", "-thinking-budget", type=int, default=10000, help="The budget of tokens for the thinking")
-    parser.add_argument("-m", "-max-tokens", type=int, default=16000, help="The maximum number of tokens for the response")
-    parser.add_argument("-M", "--model", type=str, default="claude-sonnet-4-20250514", help="The model to use")
-
-    args = parser.parse_args()
-    return args
-
-
-def main(args: argparse.Namespace) -> None:
-    if not args.prompt:
+def main(args):
+    prompt = args.prompt
+    if not prompt:
         prompt = input("Enter the prompt: ").strip()
     else:
         prompt = args.prompt
+
+    client = anthropic.Anthropic(
+        api_key=ANTHROPIC_API_KEY
+    )
+
     thinking_budget = args.thinking_budget
     max_tokens = args.max_tokens
     model = args.model
@@ -55,7 +37,9 @@ def main(args: argparse.Namespace) -> None:
         },
         messages=[{
             "role": "user",
-            "content": { "input_text": prompt }
+            "content": [
+                { "type": "text", "text": prompt }
+            ]
         }]
     )
 
@@ -66,9 +50,9 @@ def main(args: argparse.Namespace) -> None:
             reasoning_blocks.append(block.thinking)
             print(f"\nThinking : {block.thinking}")
         elif block.type == "text":
-            text_blocks.append(block.text)
+            text_blocks.append(block)
         
-        print(f"\n{block.text}")
+            print(f"\n{block}")
 
         print(
             f"{f'[INFO]':^90}\n{__file__} : {__name__} - l51 : \n{block=}")
@@ -96,8 +80,15 @@ def main(args: argparse.Namespace) -> None:
     with open(f"text/output/{file_name}.json", "w") as f:
         json.dump(response_json, f, ensure_ascii=True,indent=4)
 
-    
+@set_build_parser('anthropic-deep-search')
+def build(p):
+    p.add_argument("--prompt", type=str,  help="The prompt to send to the model")
+    p.add_argument("--file-name", type=str, help="The name of the file to save the response to")
+    p.add_argument("--thinking-budget", type=int, default=10000, help="The budget of tokens for the thinking")
+    p.add_argument("--max-tokens", type=int, default=16000, help="The maximum number of tokens for the response")
+    p.add_argument("--model", type=str, default="claude-sonnet-4-20250514", help="The model to use")
+    args = p.parse_args()
+    return args
 
 if __name__ == "__main__":
-    args = add_args()
-    main(args)
+    anthropic_deep_search_main(build(argparse.ArgumentParser()))

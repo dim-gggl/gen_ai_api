@@ -1,6 +1,7 @@
+from cmd import Cmd
 from cli_core import CLI, discover_commands
 
-discover_commands('text', 'gen_image', 'search', 'gen_video')  # import side-effect: registers cmds
+discover_commands('text', 'gen_image', 'search', 'gen_video', 'gen_audio')  # import side-effect: registers cmds
 
 cli = CLI(
     prog='ai-tools',
