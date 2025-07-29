@@ -4,7 +4,10 @@ import anthropic
 from configs import ANTHROPIC_API_KEY, ANTHROPIC_MODELS
 
 from cli_core import command, set_build_parser, positive_int
-    
+from argument_helpers import add_common_args, get_api_key_from_env
+
+ANTHROPIC_API_KEY = get_api_key_from_env("ANTHROPIC_API_KEY")
+ANTHROPIC_MODELS = ["claude-3-5-sonnet-20241022", "claude-3-opus-20240229"]
 
 @command('anthropic-message', help='Generate text via Anthropic Chat API')
 def anthropic_message_main(args):
@@ -33,10 +36,15 @@ def anthropic_message_main(args):
 
 @set_build_parser('anthropic-message')
 def build(p):
-    p.add_argument('--api-key', aidefault=ANTHROPIC_API_KEY)
-    p.add_argument('--max-tokens', type=positive_int, default=1024)
-    p.add_argument('--model', default=ANTHROPIC_MODELS[0])
-    p.add_argument('--prompt')
+    # Ajouter les arguments communs
+    add_common_args(p, ['api', 'model'])
+    
+    # Arguments spécifiques à Anthropic
+    p.add_argument('--prompt', required=True, help='Text prompt')
+    p.add_argument('--api-key', default=ANTHROPIC_API_KEY, help='Anthropic API key')
+    p.add_argument('--model', choices=ANTHROPIC_MODELS, default=ANTHROPIC_MODELS[0])
+    
+    # Pas besoin de p.parse_args() - cli_core s'en charge
     args = p.parse_args()
     return args
 
